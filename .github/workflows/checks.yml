@@ -1,0 +1,28 @@
+name: Simulation checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -r requirements-lock.txt
+      - run: python -m pip check
+      - run: python -m unittest discover -s tests -v
+      - run: python run_example.py --backend numpy
+      - run: python run_example.py --backend aer
